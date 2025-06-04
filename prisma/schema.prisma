@@ -18,8 +18,9 @@ model Account {
   id        Int          @id @default(autoincrement())
   name      String
   type      AccountType
-  balance   Float
-  transactions  Transaction[]   
+  balance   Float   
+
+  transactions Transaction[]
 }
 
 model Transaction {
@@ -27,8 +28,8 @@ model Transaction {
   accountId     Int
   categoryId    Int
   amount        Float
-  description   String
-  data          DateTime
+  description   String         
+  date          DateTime
   type          TransactionType
   notes         String?   //optional
   receipt       String?   // optional URL
@@ -42,8 +43,7 @@ model Category {
   name        String
   color       String
   type        TransactionType
-
-  transactions Transaction[]
+  transactions   Transaction[]
 }
 
 enum AccountType {
