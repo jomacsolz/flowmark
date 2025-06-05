@@ -25,10 +25,13 @@ export default function TransactionsSection({ transactions, setTransactions, acc
     setShowForm(false);
   };
 
-  const handleUpdateTransaction = (updatedTransaction: Transaction) => {
-    setTransactions(transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
-    setEditingTransaction(null);
+  const handleUpdateTransaction = (transaction: Transaction | Omit<Transaction, "id">) => {
+  if ("id" in transaction) {
+      setTransactions(transactions.map(t => t.id === transaction.id ? transaction : t));
+      setEditingTransaction(null);
+    }
   };
+
 
   const handleDeleteTransaction = (id: number) => {
     if (confirm("Are you sure you want to delete this transaction?")) {

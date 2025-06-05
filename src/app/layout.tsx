@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Load fonts with variables
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
   subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
-  title: "flowmark",
-  description: "money",
+  title: "Flowmark",
+  description: "Track and manage your money with style.",
 };
 
 export default function RootLayout({
@@ -25,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${poppins.variable} antialiased bg-[#001a44] text-white min-h-screen`}
+        style={{
+          fontFamily: "var(--font-inter)",
+        }}
       >
         {children}
       </body>
