@@ -8,7 +8,7 @@ interface Props {
   transactions: Transaction[];
   setTransactions: (transactions: Transaction[]) => void;
   accounts: Account[];
-  setAccounts: (accounts: Account[]) => void; // Add this prop
+  setAccounts: (accounts: Account[]) => void;
   categories: Category[];
 }
 
@@ -17,58 +17,140 @@ export default function TransactionsSection({ transactions, setTransactions, acc
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [filterCategory, setFilterCategory] = useState<number | null>(null);
 
-  const updateAccountBalance = (accountId: number, amount: number, isAdding: boolean = true) => {
-    setAccounts(accounts.map(account => {
-      if (account.id === accountId) {
-        return {
-          ...account,
-          balance: isAdding ? account.balance + amount : account.balance - amount
-        };
+  const updateAccountBalance = async (accountId: number, amount: number, isAdding: boolean = true) => {
+    const account = accounts.find(a => a.id === accountId);
+    if (!account) return;
+
+    const newBalance = isAdding ? account.balance + amount : account.balance - amount;
+
+    // Update local state immediately for UI responsiveness
+    setAccounts(accounts.map(acc => {
+      if (acc.id === accountId) {
+        return { ...acc, balance: newBalance };
       }
-      return account;
+      return acc;
     }));
+
+    // Update database
+    try {
+      const response = await fetch(`/api/accounts/${accountId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...account,
+          balance: newBalance
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update account balance');
+      }
+    } catch (error) {
+      console.error('Error updating account balance:', error);
+      // Revert local state on error
+      setAccounts(accounts.map(acc => {
+        if (acc.id === accountId) {
+          return { ...acc, balance: account.balance };
+        }
+        return acc;
+      }));
+    }
   };
 
-  const handleAddTransaction = (transaction: Omit<Transaction, "id">) => {
-    const newTransaction = {
-      ...transaction,
-      id: Math.max(...transactions.map(t => t.id), 0) + 1
-    };
-    
-    // Update account balance
-    updateAccountBalance(newTransaction.accountId, newTransaction.amount, true);
-    
-    setTransactions([...transactions, newTransaction]);
-    setShowForm(false);
+  const handleAddTransaction = async (transaction: Omit<Transaction, "id">) => {
+    try {
+      // Create transaction in database
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transaction),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create transaction');
+      }
+
+      const newTransaction = await response.json();
+      
+      // Update account balance
+      await updateAccountBalance(newTransaction.accountId, newTransaction.amount, true);
+      
+      // Update local state
+      setTransactions([...transactions, newTransaction]);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      alert('Failed to add transaction. Please try again.');
+    }
   };
 
-  const handleUpdateTransaction = (updatedTransaction: Transaction | Omit<Transaction, "id">) => {
+  const handleUpdateTransaction = async (updatedTransaction: Transaction | Omit<Transaction, "id">) => {
     if ("id" in updatedTransaction) {
       const oldTransaction = transactions.find(t => t.id === updatedTransaction.id);
       
       if (oldTransaction) {
-        // Reverse the old transaction's effect on balance
-        updateAccountBalance(oldTransaction.accountId, oldTransaction.amount, false);
-        
-        // Apply the new transaction's effect on balance
-        updateAccountBalance(updatedTransaction.accountId, updatedTransaction.amount, true);
+        try {
+          // Update transaction in database
+          const response = await fetch('/api/transactions', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedTransaction),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to update transaction');
+          }
+
+          const updated = await response.json();
+
+          // Reverse the old transaction's effect on balance
+          await updateAccountBalance(oldTransaction.accountId, oldTransaction.amount, false);
+          
+          // Apply the new transaction's effect on balance
+          await updateAccountBalance(updated.accountId, updated.amount, true);
+          
+          // Update local state
+          setTransactions(transactions.map(t => t.id === updated.id ? updated : t));
+          setEditingTransaction(null);
+        } catch (error) {
+          console.error('Error updating transaction:', error);
+          alert('Failed to update transaction. Please try again.');
+        }
       }
-      
-      setTransactions(transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
-      setEditingTransaction(null);
     }
   };
 
-  const handleDeleteTransaction = (id: number) => {
+  const handleDeleteTransaction = async (id: number) => {
     if (confirm("Are you sure you want to delete this transaction?")) {
       const transaction = transactions.find(t => t.id === id);
       
       if (transaction) {
-        // Reverse the transaction's effect on account balance
-        updateAccountBalance(transaction.accountId, transaction.amount, false);
+        try {
+          // Delete transaction from database
+          const response = await fetch(`/api/transactions/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete transaction');
+          }
+
+          // Reverse the transaction's effect on account balance
+          await updateAccountBalance(transaction.accountId, transaction.amount, false);
+          
+          // Update local state
+          setTransactions(transactions.filter(t => t.id !== id));
+        } catch (error) {
+          console.error('Error deleting transaction:', error);
+          alert('Failed to delete transaction. Please try again.');
+        }
       }
-      
-      setTransactions(transactions.filter(t => t.id !== id));
     }
   };
 
