@@ -1,9 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flowmark 💰
 
-## Getting Started
+*Where your money flows, leave a mark.*
 
-First, run the development server:
+Flowmark is a modern, intuitive budget tracking application built with Next.js that helps you manage your personal finances with style and simplicity.
 
+## ✨ Features
+
+- **Account Management**: Track multiple accounts including checking, savings, cash, and credit cards
+- **Transaction Tracking**: Record and categorize your income and expenses
+- **Category Organization**: Create custom categories with color coding for better organization
+- **Responsive Design**: Beautiful dark theme with responsive layout
+- **Real-time Updates**: Dynamic state management for instant updates
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/jomacsolz/flowmark.git
+cd flowmark
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+3. Set up the database:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+4. Start the development server:
 ```bash
 npm run dev
 # or
@@ -14,23 +53,51 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+flowmark/
+├── src/
+│   ├── app/
+│   │   └── page.tsx           # Main application page
+│   ├── components/
+│   │   ├── AccountsSection.tsx
+│   │   ├── TransactionsSection.tsx
+│   │   └── CategoriesSection.tsx
+│   ├── types.ts               # TypeScript type definitions
+│   └── utils/                 # Utility functions
+├── prisma/
+│   └── schema.prisma          # Database schema
+├── public/
+│   ├── FlowmarkIcon.png       # App logo
+│   └── icons/                 # Feature icons
+└── README.md
+```
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework**: Next.js 14+ with App Router
+- **Language**: TypeScript
+- **Database**: Prisma ORM
+- **Styling**: Tailwind CSS
+- **UI Components**: Custom React components
+- **State Management**: React hooks (useState)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 💡 Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Managing Accounts
+- Add different types of accounts (bank, cash, credit)
+- Track account balances
+- View account summaries
 
-## Deploy on Vercel
+### Recording Transactions
+- Add income and expense transactions
+- Link transactions to specific accounts and categories
+- Add descriptions and notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Organizing Categories
+- Create custom categories for different types of expenses and income
+- Assign colors to categories for visual organization
+- Manage category types (income vs expense)
