@@ -108,12 +108,40 @@ export default function BudgetTracker() {
             >
               ← Back to Home
             </button>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>
-              FLOWMARK
-            </h1>
-            <p className="text-sm italic text-gray-300 text-gray-600 dark:text-gray-400" style={{ fontFamily: "Poppins, sans-serif" }}>
-              Where your money flows, leave a mark.
-            </p>
+            
+            {/* Navigation buttons */}
+            <div className="flex space-x-4 mt-6">
+              <button
+                onClick={() => setActiveSection("accounts")}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
+                  activeSection === "accounts"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                Accounts
+              </button>
+              <button
+                onClick={() => setActiveSection("transactions")}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
+                  activeSection === "transactions"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                Transactions
+              </button>
+              <button
+                onClick={() => setActiveSection("categories")}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
+                  activeSection === "categories"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                Categories
+              </button>
+            </div>
           </header>
 
           {/* Content Section */}
