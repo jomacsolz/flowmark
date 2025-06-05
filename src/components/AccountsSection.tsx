@@ -41,7 +41,7 @@ export default function AccountsSection({ accounts, setAccounts }: Props) {
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
         <h2 className="text-xl font-semibold mb-2">Total Balance</h2>
         <p className="text-3xl font-bold">
-          ${totalBalance.toFixed(2)}
+          ₱{totalBalance.toFixed(2)}
         </p>
         <p className="text-blue-100 mt-2">
           Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}
@@ -88,7 +88,7 @@ export default function AccountsSection({ accounts, setAccounts }: Props) {
                 <span className={`text-lg font-semibold ${
                   account.balance >= 0 ? "text-green-600" : "text-red-600"
                 }`}>
-                  ${account.balance.toFixed(2)}
+                  ₱{account.balance.toFixed(2)}
                 </span>
                 <div className="flex space-x-2">
                   <button

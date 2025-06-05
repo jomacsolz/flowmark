@@ -118,7 +118,7 @@ export default function TransactionsSection({ transactions, setTransactions, acc
                 <span className={`text-lg font-semibold ${
                   transaction.amount >= 0 ? "text-green-600" : "text-red-600"
                 }`}>
-                  {transaction.amount >= 0 ? "+" : ""}${Math.abs(transaction.amount).toFixed(2)}
+                  {transaction.amount >= 0 ? "+" : ""}₱{Math.abs(transaction.amount).toFixed(2)}
                 </span>
                 <div className="flex space-x-2">
                   <button
