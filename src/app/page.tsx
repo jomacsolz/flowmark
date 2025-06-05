@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AccountsSection from "../components/AccountsSection";
 import TransactionsSection from "../components/TransactionsSection";
 import CategoriesSection from "../components/CategoriesSection";
@@ -9,43 +9,93 @@ import { Account, Transaction, Category } from "../types";
 
 export default function BudgetTracker() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Sample data for the dashboard sections
-  const [accounts, setAccounts] = useState<Account[]>([
-    { id: 1, name: "Checking Account", type: "bank", balance: 2500.00 },
-    { id: 2, name: "Cash Wallet", type: "cash", balance: 150.00 },
-    { id: 3, name: "Credit Card", type: "credit", balance: -340.00 },
-  ]);
+  // const [accounts, setAccounts] = useState<Account[]>([
+  //   { id: 1, name: "Checking Account", type: "bank", balance: 2500.00 },
+  //   { id: 2, name: "Cash Wallet", type: "cash", balance: 150.00 },
+  //   { id: 3, name: "Credit Card", type: "credit", balance: -340.00 },
+  // ]);
 
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: 1,
-      accountId: 1,
-      categoryId: 1,
-      amount: -45.67,
-      description: "Grocery shopping",
-      date: "2024-01-15",
-      type: "expense",
-      notes: "Weekly groceries at SuperMart"
-    },
-    {
-      id: 2,
-      accountId: 1,
-      categoryId: 4,
-      amount: 3000.00,
-      description: "Salary",
-      date: "2024-01-01",
-      type: "income"
-    }
-  ]);
+  // const [transactions, setTransactions] = useState<Transaction[]>([
+  //   {
+  //     id: 1,
+  //     accountId: 1,
+  //     categoryId: 1,
+  //     amount: -45.67,
+  //     description: "Grocery shopping",
+  //     date: "2024-01-15",
+  //     type: "expense",
+  //     notes: "Weekly groceries at SuperMart"
+  //   },
+  //   {
+  //     id: 2,
+  //     accountId: 1,
+  //     categoryId: 4,
+  //     amount: 3000.00,
+  //     description: "Salary",
+  //     date: "2024-01-01",
+  //     type: "income"
+  //   }
+  // ]);
 
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: "Food & Dining", color: "#ef4444", type: "expense" },
-    { id: 2, name: "Transportation", color: "#3b82f6", type: "expense" },
-    { id: 3, name: "Utilities", color: "#eab308", type: "expense" },
-    { id: 4, name: "Salary", color: "#22c55e", type: "income" },
-    { id: 5, name: "Investment", color: "#8b5cf6", type: "income" },
-  ]);
+  // const [categories, setCategories] = useState<Category[]>([
+  //   { id: 1, name: "Food & Dining", color: "#ef4444", type: "expense" },
+  //   { id: 2, name: "Transportation", color: "#3b82f6", type: "expense" },
+  //   { id: 3, name: "Utilities", color: "#eab308", type: "expense" },
+  //   { id: 4, name: "Salary", color: "#22c55e", type: "income" },
+  //   { id: 5, name: "Investment", color: "#8b5cf6", type: "income" },
+  // ]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [accountsRes, transactionsRes, categoriesRes] = await Promise.all([
+          fetch('/api/accounts'),
+          fetch('/api/transactions'),
+          fetch('/api/categories')
+        ]);
+
+        if (accountsRes.ok) {
+          const accountsData = await accountsRes.json();
+          setAccounts(accountsData);
+        }
+
+        if (transactionsRes.ok) {
+          const transactionsData = await transactionsRes.json();
+          setTransactions(transactionsData);
+        }
+
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setCategories(categoriesData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        // Fallback to sample data if API fails
+        setAccounts([
+          { id: 1, name: "Checking Account", type: "bank", balance: 2500.00 },
+          { id: 2, name: "Cash Wallet", type: "cash", balance: 150.00 },
+          { id: 3, name: "Credit Card", type: "credit", balance: -340.00 },
+        ]);
+        setCategories([
+          { id: 1, name: "Food & Dining", color: "#ef4444", type: "expense" },
+          { id: 2, name: "Transportation", color: "#3b82f6", type: "expense" },
+          { id: 3, name: "Utilities", color: "#eab308", type: "expense" },
+          { id: 4, name: "Salary", color: "#22c55e", type: "income" },
+          { id: 5, name: "Investment", color: "#8b5cf6", type: "income" },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const features = [
     {
@@ -82,6 +132,7 @@ export default function BudgetTracker() {
             transactions={transactions}
             setTransactions={setTransactions}
             accounts={accounts}
+            setAccounts={setAccounts}
             categories={categories}
           />
         );
@@ -91,11 +142,18 @@ export default function BudgetTracker() {
         return (
           <div className="bg-[#1c1c2e] p-6 rounded-2xl shadow-lg">
             <h1 className="text-2xl font-bold mb-4 capitalize">{activeSection}</h1>
-            <p>This section is under development.</p>
           </div>
         );
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#001a44] flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   if (activeSection) {
     return (

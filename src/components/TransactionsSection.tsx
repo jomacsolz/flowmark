@@ -8,37 +8,71 @@ interface Props {
   transactions: Transaction[];
   setTransactions: (transactions: Transaction[]) => void;
   accounts: Account[];
+  setAccounts: (accounts: Account[]) => void; // Add this prop
   categories: Category[];
 }
 
-export default function TransactionsSection({ transactions, setTransactions, accounts, categories }: Props) {
+export default function TransactionsSection({ transactions, setTransactions, accounts, setAccounts, categories }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [filterCategory, setFilterCategory] = useState<number | null>(null);
+
+  const updateAccountBalance = (accountId: number, amount: number, isAdding: boolean = true) => {
+    setAccounts(accounts.map(account => {
+      if (account.id === accountId) {
+        return {
+          ...account,
+          balance: isAdding ? account.balance + amount : account.balance - amount
+        };
+      }
+      return account;
+    }));
+  };
 
   const handleAddTransaction = (transaction: Omit<Transaction, "id">) => {
     const newTransaction = {
       ...transaction,
       id: Math.max(...transactions.map(t => t.id), 0) + 1
     };
+    
+    // Update account balance
+    updateAccountBalance(newTransaction.accountId, newTransaction.amount, true);
+    
     setTransactions([...transactions, newTransaction]);
     setShowForm(false);
   };
 
-  const handleUpdateTransaction = (transaction: Transaction | Omit<Transaction, "id">) => {
-  if ("id" in transaction) {
-      setTransactions(transactions.map(t => t.id === transaction.id ? transaction : t));
+  const handleUpdateTransaction = (updatedTransaction: Transaction | Omit<Transaction, "id">) => {
+    if ("id" in updatedTransaction) {
+      const oldTransaction = transactions.find(t => t.id === updatedTransaction.id);
+      
+      if (oldTransaction) {
+        // Reverse the old transaction's effect on balance
+        updateAccountBalance(oldTransaction.accountId, oldTransaction.amount, false);
+        
+        // Apply the new transaction's effect on balance
+        updateAccountBalance(updatedTransaction.accountId, updatedTransaction.amount, true);
+      }
+      
+      setTransactions(transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
       setEditingTransaction(null);
     }
   };
 
-
   const handleDeleteTransaction = (id: number) => {
     if (confirm("Are you sure you want to delete this transaction?")) {
+      const transaction = transactions.find(t => t.id === id);
+      
+      if (transaction) {
+        // Reverse the transaction's effect on account balance
+        updateAccountBalance(transaction.accountId, transaction.amount, false);
+      }
+      
       setTransactions(transactions.filter(t => t.id !== id));
     }
   };
 
+  // ...existing code...
   const filteredTransactions = filterCategory 
     ? transactions.filter(t => t.categoryId === filterCategory)
     : transactions;
@@ -56,8 +90,40 @@ export default function TransactionsSection({ transactions, setTransactions, acc
   const getCategoryColor = (categoryId: number) =>
     categories.find(c => c.id === categoryId)?.color || "#6b7280";
 
+  // Calculate totals for summary
+  const totalIncome = transactions
+    .filter(t => t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalExpenses = transactions
+    .filter(t => t.amount < 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const netBalance = totalIncome - totalExpenses;
+
   return (
     <div className="space-y-6">
+      {/* Summary Card */}
+      <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg p-6 text-white">
+        <h2 className="text-xl font-semibold mb-4">Transaction Summary</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <p className="text-green-100">Total Income</p>
+            <p className="text-2xl font-bold">₱{totalIncome.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-red-100">Total Expenses</p>
+            <p className="text-2xl font-bold">₱{totalExpenses.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-blue-100">Net Balance</p>
+            <p className={`text-2xl font-bold ${netBalance >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+              ₱{netBalance.toFixed(2)}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Header with Add Button and Filter */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
         <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
