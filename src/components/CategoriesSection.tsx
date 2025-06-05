@@ -150,7 +150,13 @@ export default function CategoriesSection({ categories, setCategories }: Props) 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <CategoryForm
               category={editingCategory}
-              onSubmit={editingCategory ? handleUpdateCategory : handleAddCategory}
+              onSubmit={(category) => {
+                if ('id' in category) {
+                  handleUpdateCategory(category as Category);
+                } else {
+                  handleAddCategory(category as Omit<Category, "id">);
+                }
+              }}
               onCancel={() => {
                 setShowForm(false);
                 setEditingCategory(null);

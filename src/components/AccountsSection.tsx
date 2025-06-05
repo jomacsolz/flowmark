@@ -123,7 +123,13 @@ export default function AccountsSection({ accounts, setAccounts }: Props) {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <AccountForm
               account={editingAccount}
-              onSubmit={editingAccount ? handleUpdateAccount : handleAddAccount}
+              onSubmit={(account) => {
+                if (editingAccount) {
+                  handleUpdateAccount(account as Account);
+                } else {
+                  handleAddAccount(account as Omit<Account, "id">);
+                }
+              }}
               onCancel={() => {
                 setShowForm(false);
                 setEditingAccount(null);

@@ -1,46 +1,129 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-// import { Inter, Poppins } from "next/font/google";
-
-// const poppins = Poppins({
-//   weight: "700",
-//   subsets: ["latin"],
-//   variable: "--font-poppins",
-// });
-
-// const inter = Inter({
-//   weight: "400",
-//   style: "italic",
-//   subsets: ["latin"],
-//   variable: "--font-inter",
-// });
+import { useState } from "react";
+import AccountsSection from "../components/AccountsSection";
+import TransactionsSection from "../components/TransactionsSection";
+import CategoriesSection from "../components/CategoriesSection";
+import { Account, Transaction, Category } from "../types";
 
 export default function BudgetTracker() {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  
+  // Sample data for the dashboard sections
+  const [accounts, setAccounts] = useState<Account[]>([
+    { id: 1, name: "Checking Account", type: "bank", balance: 2500.00 },
+    { id: 2, name: "Cash Wallet", type: "cash", balance: 150.00 },
+    { id: 3, name: "Credit Card", type: "credit", balance: -340.00 },
+  ]);
+
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    {
+      id: 1,
+      accountId: 1,
+      categoryId: 1,
+      amount: -45.67,
+      description: "Grocery shopping",
+      date: "2024-01-15",
+      type: "expense",
+      notes: "Weekly groceries at SuperMart"
+    },
+    {
+      id: 2,
+      accountId: 1,
+      categoryId: 4,
+      amount: 3000.00,
+      description: "Salary",
+      date: "2024-01-01",
+      type: "income"
+    }
+  ]);
+
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 1, name: "Food & Dining", color: "#ef4444", type: "expense" },
+    { id: 2, name: "Transportation", color: "#3b82f6", type: "expense" },
+    { id: 3, name: "Utilities", color: "#eab308", type: "expense" },
+    { id: 4, name: "Salary", color: "#22c55e", type: "income" },
+    { id: 5, name: "Investment", color: "#8b5cf6", type: "income" },
+  ]);
+
   const features = [
     {
       title: "Accounts",
       description: "Manage your cash, bank, and credit card accounts",
-      href: "/accounts",
       button: "Manage Accounts",
       icon: "/icons/accounts.png",
+      id: "accounts"
     },
     {
-      title: "Transactions",
+      title: "Transactions", 
       description: "Add and track your income and expenses",
-      href: "/transactions",
       button: "View Transactions",
       icon: "/icons/transactions.png",
+      id: "transactions"
     },
     {
       title: "Categories",
       description: "Organize your spending with custom categories",
-      href: "/categories",
-      button: "Manage Categories",
+      button: "Manage Categories", 
       icon: "/icons/categories.png",
+      id: "categories"
     },
   ];
+
+  // Render the selected section
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case "accounts":
+        return <AccountsSection accounts={accounts} setAccounts={setAccounts} />;
+      case "transactions":
+        return (
+          <TransactionsSection
+            transactions={transactions}
+            setTransactions={setTransactions}
+            accounts={accounts}
+            categories={categories}
+          />
+        );
+      case "categories":
+        return <CategoriesSection categories={categories} setCategories={setCategories} />;
+      default:
+        return (
+          <div className="bg-[#1c1c2e] p-6 rounded-2xl shadow-lg">
+            <h1 className="text-2xl font-bold mb-4 capitalize">{activeSection}</h1>
+            <p>This section is under development.</p>
+          </div>
+        );
+    }
+  };
+
+  if (activeSection) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto p-6">
+          <header className="mb-8">
+            <button 
+              onClick={() => setActiveSection(null)}
+              className="mb-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-md transition-colors duration-200"
+            >
+              ← Back to Home
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>
+              FLOWMARK
+            </h1>
+            <p className="text-sm italic text-gray-300 text-gray-600 dark:text-gray-400" style={{ fontFamily: "Poppins, sans-serif" }}>
+              Where your money flows, leave a mark.
+            </p>
+          </header>
+
+          {/* Content Section */}
+          <div className="space-y-6">
+            {renderActiveSection()}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#001a44] min-h-screen text-white px-4 py-8">
@@ -75,11 +158,12 @@ export default function BudgetTracker() {
               <h2 className="text-xl font-semibold">{feature.title}</h2>
               <p className="text-sm mt-1 text-gray-300">{feature.description}</p>
             </div>
-            <Link href={feature.href} passHref>
-              <button className="mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-md transition-colors duration-200">
-                {feature.button}
-              </button>
-            </Link>
+            <button 
+              onClick={() => setActiveSection(feature.id)}
+              className="mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-md transition-colors duration-200"
+            >
+              {feature.button}
+            </button>
           </div>
         ))}
       </div>
